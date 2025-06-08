@@ -1,0 +1,30 @@
+{
+    "chb01_03":{
+        "seizure_start_time": 2996,
+        "seizure_end_time": 3036
+    },
+    "chb01_04":{
+        "seizure_start_time": 1467,
+        "seizure_end_time": 1494
+    },
+    "chb01_15":{
+        "seizure_start_time": 1732,
+        "seizure_end_time": 1772
+    },
+    "chb01_16":{
+        "seizure_start_time": 1015,
+        "seizure_end_time": 1066
+    },
+    "chb01_18":{
+        "seizure_start_time": 1720,
+        "seizure_end_time": 1810
+    },
+    "chb01_21":{
+        "seizure_start_time": 327,
+        "seizure_end_time": 420
+    },
+    "chb01_26":{
+        "seizure_start_time": 1862,
+        "seizure_end_time": 1963
+    }
+}
