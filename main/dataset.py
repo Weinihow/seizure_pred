@@ -70,15 +70,22 @@ class MFCCDataset(Dataset):
         eeg_signal: stack of raw signals
         seizure_ontime: array of seizure on-time
         '''
-        self.data = []
-        self.label = []
-        for i, segment in enumerate(eeg_signal):
-            data, label = sliding_window(
-                            eeg_segment=segment,
-                            seizure_ontime=seizure_ontime[i]
-                          )
-            self.data.append(data)
-            self.label.append(label)
+        try:
+            self.data = []
+            self.label = []
+            for i, segment in enumerate(eeg_signal):
+                data, label = sliding_window(
+                                eeg_segment=segment,
+                                seizure_ontime=seizure_ontime[i]
+                            )
+                self.data.extend(data)
+                self.label.extend(label)
+            if len(self.data) != len(self.label):
+                print('data number and label number mismatch')
+                raise 
+        except:
+            print('dataset loading error')
+            raise
         
     def __len__(self):
         return len(self.label)
