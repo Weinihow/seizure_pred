@@ -72,10 +72,10 @@ class MFCCDataset(Dataset):
         '''
         self.data = []
         self.label = []
-        for segment in eeg_signal:
+        for i, segment in enumerate(eeg_signal):
             data, label = sliding_window(
                             eeg_segment=segment,
-                            seizure_ontime=seizure_ontime
+                            seizure_ontime=seizure_ontime[i]
                           )
             self.data.append(data)
             self.label.append(label)
