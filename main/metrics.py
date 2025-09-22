@@ -40,7 +40,7 @@ def basic_metric(y_true, y_pred, y_score=None, metrics=['all']):
 
     max_len = max(len(k) for k in results.keys())
     for k, v in results.items():
-        print(f"{k.ljust(max_len)}: {v}")
+        print(f"{k.ljust(max_len)}: {v:.4f}")
 
     return results
     
@@ -48,4 +48,4 @@ if __name__ == '__main__':
     y_true = [0, 0, 1, 1, 0, 1, 0, 1]
     y_pred = [0, 0, 1, 0, 1, 1, 1, 1]
     y_score = [0.1, 0.3, 0.9, 0.4, 0.2, 0.8, 0.7, 0.95]
-    results = basic_metric(y_true, y_pred, y_score, metrics=['ALL'])
+    results = basic_metric(y_true, y_pred, y_score, metrics=['all'])
