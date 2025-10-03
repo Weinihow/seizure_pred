@@ -92,3 +92,11 @@ class MFCCDataset(Dataset):
     
     def __getitem__(self, idx):
         return self.data[idx], self.label[idx]
+    
+class RawDataset(Dataset):
+    def __init__(self, eeg_signal, timepoints):
+        try:
+            
+        except:
+            print('dataset loading error')
+            raise
