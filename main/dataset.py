@@ -105,16 +105,16 @@ def raw_window(segment, info, duration=5, fs=256):
     if "interictal_start_time" in info:
         start = info['interictal_start_time']*fs
         end = info['interictal_end_time']*fs
-        trimmed_signal = segment[start:end]
+        trimmed_signal = segment[:, start:end]
 
-        n_segments = len(trimmed_signal) // samples_per_segment
+        n_segments = len(trimmed_signal[1]) // samples_per_segment
 
         n_data = []
         n_label = []
         for i in range(n_segments):
             start = i * samples_per_segment
             end = start + samples_per_segment
-            n_data.append(trimmed_signal[start:end])
+            n_data.append(trimmed_signal[:, start:end])
             n_label.append(0)
         
         data.extend(n_data)
@@ -123,16 +123,16 @@ def raw_window(segment, info, duration=5, fs=256):
     if "preictal_start_time" in info:
         start = info['preictal_start_time']*fs
         end = info['seizure_start_time']*fs
-        trimmed_signal = segment[start:end]
+        trimmed_signal = segment[:, start:end]
 
-        n_segments = len(trimmed_signal) // samples_per_segment
+        n_segments = len(trimmed_signal[1]) // samples_per_segment
 
         n_data = []
         n_label = []
         for i in range(n_segments):
             start = i * samples_per_segment
             end = start + samples_per_segment
-            n_data.append(trimmed_signal[start:end])
+            n_data.append(trimmed_signal[:, start:end])
             n_label.append(1)
         
         data.extend(n_data)
