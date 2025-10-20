@@ -141,7 +141,7 @@ def raw_window(segment, info, duration=5, fs=256):
     return data, label
     
 class RawDataset(Dataset):
-    def __init__(self, eeg_signal, timepoints):
+    def __init__(self, eeg_signal, timepoints, mode, balance=False):
         try:
             self.data = []
             self.label = []
@@ -156,6 +156,21 @@ class RawDataset(Dataset):
         except:
             print('dataset loading error')
             raise
+
+        # make dataset balance (duplicate)
+        if (mode == 'train') and balance:
+            labels_np = np.array(self.label)
+
+            idx_pos = np.where(labels_np == 1)[0]
+            idx_neg = np.where(labels_np == 0)[0]
+
+            if len(idx_pos) > 0:  # avoid crash if no positive data
+                idx_pos_repeat = np.random.choice(idx_pos, size=len(idx_neg), replace=True)
+                balanced_idx = np.concatenate([idx_neg, idx_pos_repeat])
+
+                # replace self.data and self.label by balanced version
+                self.data = [self.data[i] for i in balanced_idx]
+                self.label = [self.label[i] for i in balanced_idx]
     
     def __len__(self):
         return len(self.label)
