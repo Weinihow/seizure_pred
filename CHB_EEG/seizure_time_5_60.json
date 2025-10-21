@@ -8,12 +8,12 @@
         "interictal_end_time": 3003
     },
     "chb01_03": {
-        "seizure_start_time": 2996,
+        "preictal_end_time": 2996,
         "seizure_end_time": 3036,
         "preictal_start_time": 2696
     },
     "chb01_04": {
-        "seizure_start_time": 1467,
+        "preictal_end_time": 1467,
         "seizure_end_time": 1494,
         "preictal_start_time": 1167
     },
@@ -58,12 +58,12 @@
         "interictal_end_time": 1739
     },
     "chb01_15": {
-        "seizure_start_time": 1732,
+        "preictal_end_time": 1732,
         "seizure_end_time": 1772,
         "preictal_start_time": 1432
     },
     "chb01_16": {
-        "seizure_start_time": 1015,
+        "preictal_end_time": 1015,
         "seizure_end_time": 1066,
         "preictal_start_time": 715
     },
@@ -72,7 +72,7 @@
         "interictal_end_time": 1727
     },
     "chb01_18": {
-        "seizure_start_time": 1720,
+        "preictal_end_time": 1720,
         "seizure_end_time": 1810,
         "preictal_start_time": 1420
     },
@@ -82,7 +82,7 @@
     },
     "chb01_20": {},
     "chb01_21": {
-        "seizure_start_time": 327,
+        "preictal_end_time": 327,
         "seizure_end_time": 420,
         "preictal_start_time": 27
     },
@@ -103,7 +103,7 @@
         "interictal_end_time": 1870
     },
     "chb01_26": {
-        "seizure_start_time": 1862,
+        "preictal_end_time": 1862,
         "seizure_end_time": 1963,
         "preictal_start_time": 1562
     }

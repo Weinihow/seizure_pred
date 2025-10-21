@@ -38,7 +38,7 @@ def calculate_seizure_times(file_start, seizure_intervals):
 
     return seizure_times
 
-def calculate_interictal_times(seizure_times):
+def calculate_interictal_times(seizure_times, minute=60):
     """
     Calculate interictal periods as ±60 minutes around seizure start and end.
 
@@ -54,8 +54,8 @@ def calculate_interictal_times(seizure_times):
         start = seizure["Start Time"]
         end = seizure["End Time"]
 
-        interictal_start = (start - timedelta(minutes=60)).strftime("%H:%M:%S")
-        interictal_end = (end + timedelta(minutes=60)).strftime("%H:%M:%S")
+        interictal_start = (start - timedelta(minutes=minute)).strftime("%H:%M:%S")
+        interictal_end = (end + timedelta(minutes=minute)).strftime("%H:%M:%S")
 
         interictals.append({
             "Seizure #": seizure_num,
@@ -80,10 +80,16 @@ def timepoint_to_seconds(file_start, time_point):
     point_dt = datetime.strptime(time_point, "%H%M%S")
     return int((point_dt - start_dt).total_seconds())
 
-def cal_pre_time(start, interval=5):
-    return start - interval*60
+def cal_pre_time(start, seizure_times, interval=5):
+    pre_time = start - interval*60
+    for seizure in seizure_times:
+        start_time = seizure["Start Time"]
+        pre_start = (start_time - timedelta(minutes=interval)).strftime("%H:%M:%S")
+    return pre_time, pre_start
 
 if __name__ == "__main__":
+    pre_interval = 30
+    inter_interval = 120
     while True:
         # User inputs
         mode = input("Select mode: \n1. pre-ictal\n2. inter-ictal\n")
@@ -99,13 +105,14 @@ if __name__ == "__main__":
             seizures.append((start_sec, end_sec))
 
             seizure_times = calculate_seizure_times(file_start_time, seizures)
-            pre_start_time = cal_pre_time(start_sec, interval=5)
-            interictals = calculate_interictal_times(seizure_times)
+            pre_start_time = cal_pre_time(start_sec, seizure_times, interval=pre_interval)
+            interictals = calculate_interictal_times(seizure_times, minute=inter_interval)
 
             print(f"\n############################################\n{YELLOW}Calculated Seizure Times:")
             for seizure in seizure_times:
                 print(f"Seizure {seizure['Seizure #']}: {BLUE}{seizure['Start Time'].strftime("%H:%M:%S")} - {seizure['End Time'].strftime("%H:%M:%S")}{YELLOW}")
-                print(f"Pre-ictal start second: {seizure['Seizure #']}: {BLUE}{pre_start_time} sec{YELLOW}")
+                print(f"Pre-ictal start second: {BLUE}{pre_start_time[0]} sec{YELLOW}")
+                print(f"Pre-ictal start time: {BLUE}{pre_start_time[1]}{YELLOW}")
             for interictal in interictals:
                 print(f"Interictal {interictal['Seizure #']}: \nLast interictal end: {BLUE}{interictal['Interictal Start']}{YELLOW}\nNext interictal start: {BLUE}{interictal['Interictal End']}")
         if mode == '2':

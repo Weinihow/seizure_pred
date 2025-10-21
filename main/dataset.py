@@ -122,7 +122,7 @@ def raw_window(segment, info, duration=5, fs=256):
 
     if "preictal_start_time" in info:
         start = info['preictal_start_time']*fs
-        end = info['seizure_start_time']*fs
+        end = info['preictal_end_time']*fs
         trimmed_signal = segment[:, start:end]
 
         n_segments = len(trimmed_signal[1]) // samples_per_segment
@@ -142,6 +142,12 @@ def raw_window(segment, info, duration=5, fs=256):
     
 class RawDataset(Dataset):
     def __init__(self, eeg_signal, timepoints, mode, balance=False):
+        '''
+        eeg_signal: raw eeg signals
+        timepoints: from json list
+        mode: train / val / test
+        balance: whether to balance the dataset
+        '''
         try:
             self.data = []
             self.label = []
