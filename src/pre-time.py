@@ -88,8 +88,8 @@ def cal_pre_time(start, seizure_times, interval=5):
     return pre_time, pre_start
 
 if __name__ == "__main__":
-    pre_interval = 30
-    inter_interval = 120
+    pre_interval = int(input("preictal interval: "))
+    inter_interval = int(input("interictal interval: "))
     while True:
         # User inputs
         mode = input("Select mode: \n1. pre-ictal\n2. inter-ictal\n")
