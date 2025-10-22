@@ -7,6 +7,7 @@ metric list:
     recall (sensitivity)
     precision
     specificity
+    false positive rate
     AUC
     F1-score (precision & recall)
 '''
@@ -18,7 +19,7 @@ def basic_metric(y_true, y_pred, y_score=None, metrics=['all']):
     metrics = [normalize(m) for m in metrics]   # make all metric selection same form
 
     if metrics == ['all']:
-        metrics = ["accuracy", "recall", "precision", "specificity", "auc", "f1_score"]
+        metrics = ["accuracy", "recall", "precision", "specificity", "fpr", "auc", "f1_score"]
 
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel().tolist()
 
@@ -37,6 +38,8 @@ def basic_metric(y_true, y_pred, y_score=None, metrics=['all']):
         results["AUC"] = roc_auc_score(y_true, y_score)
     if "f1_score" in metrics:
         results["F1_score"] = f1_score(y_true, y_pred)
+    if "fpr" in metrics:
+        results["fpr"] = fp / (fp + tn)
 
     max_len = max(len(k) for k in results.keys())
     for k, v in results.items():
