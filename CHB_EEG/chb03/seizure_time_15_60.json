@@ -1,0 +1,90 @@
+{
+    "chb03_01":{
+        "preictal_start_time": 0,
+        "preictal_end_time": 362,
+        "seizure_end_time": 414
+    },
+    "chb03_02":{
+        "preictal_start_time": 0,
+        "preictal_end_time": 731,
+        "seizure_end_time": 796
+    },
+    "chb03_03":{
+        "preictal_start_time": 0,
+        "preictal_end_time": 432,
+        "seizure_end_time": 501
+    },
+    "chb03_04":{
+        "preictal_start_time": 1262,
+        "preictal_end_time": 2162,
+        "seizure_end_time": 2214
+    },
+    "chb03_05":{
+        "interictal_start_time": 2207,
+        "interictal_end_time": 3600
+    },
+    "chb03_06":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb03_07":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+
+    },
+    "chb03_08":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb03_09":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600        
+    },
+    "chb03_10":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600        
+    },
+    "chb03_15":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600        
+    },
+    "chb03_24":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600        
+    },
+    "chb03_31":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600             
+    },
+    "chb03_32":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600             
+    },
+    "chb03_33":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600          
+    },
+    "chb03_34":{
+        "preictal_start_time": 1082,
+        "preictal_end_time": 1982,
+        "seizure_end_time": 2029
+    },
+    "chb03_35":{
+        "preictal_start_time": 1692,
+        "preictal_end_time": 2592,
+        "seizure_end_time": 2656
+    },
+    "chb03_36":{
+        "preictal_start_time": 825,
+        "preictal_end_time": 1725,
+        "seizure_end_time": 1778
+    },
+    "chb03_37":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600            
+    },
+    "chb03_38":{
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600            
+    }
+}
