@@ -183,3 +183,40 @@ class RawDataset(Dataset):
     
     def __getitem__(self, idx):
         return self.data[idx], self.label[idx]
+
+def real_test_window(segment, duration=5, fs=256):
+    '''
+    segment: raw eeg segments (shape: (n_channel, signal_length))
+    '''
+    data = []
+    samples_per_segment = fs * duration
+
+    start = 0
+    n_segments = len(segment[1]) // samples_per_segment
+
+    n_data = []
+    for i in range(n_segments):
+        start = i * samples_per_segment
+        end = start + samples_per_segment
+        n_data.append(segment[:, start:end])
+        
+    data.extend(n_data)
+
+    return data
+
+class RealTestDataset(Dataset):
+    '''
+    just cut into 5 sec segments
+    '''
+    def __init__(self, eeg_signal):
+        self.data = []
+        data = []
+        for segment in eeg_signal:
+            data = real_test_window(segment=segment, duration=5, fs=256)
+            self.data.extend(data)
+
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, idx):
+        return self.data[idx]

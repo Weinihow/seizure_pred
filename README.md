@@ -6,3 +6,5 @@ Below is how I devided the dataset
   * Train: 04~21
   * Val: 01~03
   * Test: 22~26
+* CHB03:
+  * Train: 
