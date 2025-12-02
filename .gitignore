@@ -9,4 +9,4 @@ __pycache__/
 logs/*.log
 
 CHB_EEG/chb01/*.edf
-CHB_EEG/chb03/*.edf
+# CHB_EEG/chb03/*.edf
