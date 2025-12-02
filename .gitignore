@@ -8,5 +8,5 @@ __pycache__/
 # 忽略日誌檔
 logs/*.log
 
-# CHB_EEG/chb01/*.edf
+CHB_EEG/chb01/*.edf
 # CHB_EEG/chb03/*.edf
