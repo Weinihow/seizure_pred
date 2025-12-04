@@ -1,5 +1,5 @@
 # 忽略模型權重檔
-*.pth
+# *.pth
 
 # 忽略 Python 快取檔
 __pycache__/
