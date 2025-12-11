@@ -277,6 +277,10 @@ def plot_and_save(dataset_name, idx, raw_data, prediction, save_path, seizure_in
         ax2.plot(x2, prediction, color="red", label="Prediction", linewidth=1.5)
         ax2.set_ylabel("Prediction Probability (Not Thresholded)")
     # If prediction is binary, use step, if prob, use plot. Assuming input is binary preds for now based on original code
+    if mode == 'bg' or mode == 'all':
+        for i, _ in enumerate(prediction):
+            if prediction[i] == 1:
+                plt.axvspan(i, i+1, fc = 'red', alpha = 0.3)
     
     y1_min, y1_max = ax1.get_ylim()
     ymax = max(np.abs(y1_max), np.abs(y1_min))
