@@ -250,16 +250,20 @@ def get_seizure_time_json(dataset_name, ictal_def):
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     return os.path.join(base_path, f"CHB_EEG/{dataset_name}/seizure_time_{ictal_def[0]}_{ictal_def[1]}.json")
 
-def plot_and_save(dataset_name, idx, raw_data, prediction, save_path, seizure_info):
-    # Upsample prediction to match raw data length
-    prediction = np.repeat(prediction, 5 * 256) # 5 seconds per prediction, fs=256
-    # Truncate if mismatch
-    min_len = min(len(prediction), raw_data.shape[1])
-    prediction = prediction[:min_len]
-    raw_channel = raw_data[1, :min_len]
+def plot_and_save(dataset_name, idx, raw_data, prediction, save_path, seizure_info, sampling_rate=256, mode='bg'):
+    '''
+    mode: bg: background / l: line / all: both
+    '''
     
-    x1 = np.arange(min_len) / 256
-    x2 = np.arange(min_len) # prediction is now same valid length
+    # Upsample prediction to match raw data length
+    prediction = np.repeat(prediction, 5) # 5 seconds per prediction, fs=256
+    # # Truncate if mismatch
+    # min_len = min(len(prediction), raw_data.shape[1])
+    # prediction = prediction[:min_len]
+    raw_channel = raw_data[0]
+    
+    x1 = np.arange(raw_channel) / sampling_rate
+    x2 = np.arange(len(prediction)) # prediction is now same valid length
     
     fig, ax1 = plt.subplots(figsize=(12, 5))
     ax1.plot(x1, raw_channel, label=f"EEG", linewidth=0.5, alpha=0.7)
@@ -269,19 +273,19 @@ def plot_and_save(dataset_name, idx, raw_data, prediction, save_path, seizure_in
 
     ax2 = ax1.twinx()
     # Align prediction with time
-    x2_sec = np.arange(len(prediction)) / 256
-    ax2.plot(x2_sec, prediction, color="red", label="Prediction", linewidth=1.5)
-    ax2.set_ylabel("Prediction Probability (Not Thresholded)")
+    if mode == 'l' or mode == 'all':
+        ax2.plot(x2, prediction, color="red", label="Prediction", linewidth=1.5)
+        ax2.set_ylabel("Prediction Probability (Not Thresholded)")
     # If prediction is binary, use step, if prob, use plot. Assuming input is binary preds for now based on original code
     
     y1_min, y1_max = ax1.get_ylim()
     ymax = max(np.abs(y1_max), np.abs(y1_min))
     ax1.set_ylim(-ymax, ymax)
-    ax2.set_ylim(-0.1, 1.1)
+    ax2.set_ylim(-1.1, 1.1)
 
     # Plot seizure timing lines
     if seizure_info:
-        for key in ['interictal_start_time', 'interictal_end_time', 
+        for key in ['interictal_start_time', 'interictal_end_time', 'interictal_start_time_2', 'interictal_end_time_2',
                     'preictal_start_time', 'preictal_end_time', 'seizure_end_time']:
             if key in seizure_info and seizure_info[key]:
                 color = 'green' if 'interictal' in key else ('blue' if 'preictal' in key else 'purple')
