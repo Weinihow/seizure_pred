@@ -1,5 +1,5 @@
 # 忽略模型權重檔
-*.pth
+models/checkpoints/
 
 # 忽略 Python 快取檔
 __pycache__/
@@ -7,6 +7,10 @@ __pycache__/
 
 # 忽略日誌檔
 logs/*.log
+
+# 忽略結果檔
+result/real_test/*.png
+result/training/*.png
 
 # CHB_EEG/chb01/*.edf
 # CHB_EEG/chb03/*.edf
