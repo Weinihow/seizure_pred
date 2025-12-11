@@ -1,0 +1,137 @@
+{
+    "chb01_01": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_02": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_03": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 2096,
+        "preictal_end_time": 2996,
+        "seizure_end_time": 3036,
+        "preictal_start_time": 2096
+    },
+    "chb01_04": {
+        "interictal_start_time": 328,
+        "interictal_end_time": 567,
+        "preictal_end_time": 1467,
+        "seizure_end_time": 1494,
+        "preictal_start_time": 567,
+        "interictal_start_time_2": 2394,
+        "interictal_end_time_2": 3600
+    },
+    "chb01_05": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_06": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_07": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_08": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_09": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_10": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_11": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_12": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_13": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_14": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_15": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 832,
+        "preictal_end_time": 1732,
+        "seizure_end_time": 1772,
+        "preictal_start_time": 832,
+        "interictal_start_time_2": 2672,
+        "interictal_end_time_2": 3600
+    },
+    "chb01_16": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 115,
+        "preictal_end_time": 1015,
+        "seizure_end_time": 1066,
+        "preictal_start_time": 115,
+        "interictal_start_time_2": 1966,
+        "interictal_end_time_2": 3600
+    },
+    "chb01_17": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_18": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 820,
+        "preictal_end_time": 1720,
+        "seizure_end_time": 1810,
+        "preictal_start_time": 820,
+        "interictal_start_time_2": 2710,
+        "interictal_end_time_2": 3600
+    },
+    "chb01_19": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_20": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 2333,
+        "preictal_start_time": 2333,
+        "preictal_end_time": 2663
+    },
+    "chb01_21": {
+        "preictal_end_time": 327,
+        "seizure_end_time": 420,
+        "preictal_start_time": 0,
+        "interictal_start_time": 1320,
+        "interictal_end_time": 3600
+    },
+    "chb01_22": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_23": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_24": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_25": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 3600
+    },
+    "chb01_26": {
+        "interictal_start_time": 0,
+        "interictal_end_time": 962,
+        "preictal_end_time": 1862,
+        "seizure_end_time": 1963,
+        "preictal_start_time": 962
+    }
+}
