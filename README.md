@@ -6,6 +6,8 @@ Below is how I devided the dataset
   * Train: 04~21
   * Val: 01~03
   * Test: 22~26
+ 
+  ** # NOTE: The definition of interictal is different in seizure_time_15_45.json
 * CHB03:
   * Train: 01, 02, 03, 05~10
   * Val: 04, 15, 24, 31~33
