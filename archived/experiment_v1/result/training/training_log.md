@@ -1,0 +1,32 @@
+| Date | Model Name | Model Type | Threshold | F1 Score | Accuracy | Recall | FPR | Duration |
+|---|---|---|---|---|---|---|---|---|
+| 2025-12-11 20:04 | 01DCNN_1515 | Best Loss Model | 0.1500 | 0.4431 | 0.9428 | 0.4111 | 0.0260 | 0h 2m 32s |
+| 2025-12-11 20:04 | 01DCNN_1515 | Best Metric Model | 0.6000 | 0.6704 | 0.9456 | 1.0000 | 0.0576 | 0h 2m 32s |
+| 2025-12-11 20:06 | 01DCNN_1560 | Best Loss Model | 0.8000 | 0.7860 | 0.9627 | 1.0000 | 0.0400 | 0h 2m 19s |
+| 2025-12-11 20:06 | 01DCNN_1560 | Best Metric Model | 0.6500 | 0.9783 | 0.9970 | 1.0000 | 0.0033 | 0h 2m 19s |
+| 2025-12-11 20:09 | 01DCNN_BiLSTM_1515 | Best Loss Model | 0.2500 | 0.6134 | 0.9345 | 0.9389 | 0.0658 | 0h 3m 16s |
+| 2025-12-11 20:09 | 01DCNN_BiLSTM_1515 | Best Metric Model | 0.7500 | 0.4476 | 0.8801 | 0.8778 | 0.1198 | 0h 3m 16s |
+| 2025-12-11 20:13 | 01DCNN_BiLSTM_1560 | Best Loss Model | 0.9000 | 0.8143 | 0.9703 | 0.9500 | 0.0282 | 0h 3m 3s |
+| 2025-12-11 20:13 | 01DCNN_BiLSTM_1560 | Best Metric Model | 0.9000 | 0.8143 | 0.9703 | 0.9500 | 0.0282 | 0h 3m 3s |
+| 2025-12-11 20:16 | 01DCNN_BiLSTM_1560_Global | Best Loss Model | 0.9000 | 0.8138 | 0.9692 | 0.9833 | 0.0318 | 0h 3m 7s |
+| 2025-12-11 20:16 | 01DCNN_BiLSTM_1560_Global | Best Metric Model | 0.9000 | 0.8138 | 0.9692 | 0.9833 | 0.0318 | 0h 3m 7s |
+| 2025-12-11 22:15 | 01DCNN_1515_1_3 | Best Loss Model | 0.0500 | 0.3371 | 0.9456 | 0.2500 | 0.0137 | 0h 4m 23s |
+| 2025-12-11 22:15 | 01DCNN_1515_1_3 | Best Metric Model | 0.2500 | 0.4800 | 0.8801 | 1.0000 | 0.1270 | 0h 4m 23s |
+| 2025-12-11 22:46 | 01DCNN_BiLSTM_1515_1_3 | Best Loss Model | 0.1500 | 0.2900 | 0.8103 | 0.7000 | 0.1833 | 0h 5m 43s |
+| 2025-12-11 22:46 | 01DCNN_BiLSTM_1515_1_3 | Best Metric Model | 0.6000 | 0.7126 | 0.9692 | 0.6889 | 0.0143 | 0h 5m 43s |
+| 2025-12-12 23:50 | 01DCNN_BiLSTM_1515_ratio3 | Best Loss Model | 0.0500 | 0.3266 | 0.7958 | 0.8944 | 0.2100 | 0h 5m 57s |
+| 2025-12-12 23:51 | 01DCNN_BiLSTM_1515_ratio3 | Best Metric Model | 0.2500 | 0.4785 | 0.8881 | 0.9278 | 0.1143 | 0h 5m 57s |
+| 2025-12-13 00:10 | 01DCNN_BiLSTM_1515_ratio5 | Best Loss Model | 0.1500 | 0.4615 | 0.8730 | 0.9833 | 0.1335 | 0h 7m 00s |
+| 2025-12-13 00:10 | 01DCNN_BiLSTM_1515_ratio5 | Best Metric Model | 0.1500 | 0.5531 | 0.9121 | 0.9833 | 0.0921 | 0h 7m 00s |
+| 2025-12-13 00:36 | 01DCNN_BiLSTM_1515_ratio8 | Best Loss Model | 0.1000 | 0.5768 | 0.9237 | 0.9389 | 0.0771 | 0h 16m 21s |
+| 2025-12-13 00:36 | 01DCNN_BiLSTM_1515_ratio8 | Best Metric Model | 0.2000 | 0.6206 | 0.9376 | 0.9222 | 0.0615 | 0h 16m 21s |
+| 2025-12-13 00:41 | 01DCNN_BiLSTM_1515_ratio10 | Best Loss Model | 0.0500 | 0.4950 | 0.8908 | 0.9667 | 0.1136 | 0h 18m 45s |
+| 2025-12-13 00:41 | 01DCNN_BiLSTM_1515_ratio10 | Best Metric Model | 0.1500 | 0.4879 | 0.8896 | 0.9500 | 0.1139 | 0h 18m 45s |
+| 2025-12-13 11:59 | 01DCNN_BiLSTM_1515_ratio3_sample1.0 | Best Loss Model | 0.1500 | 0.2900 | 0.8103 | 0.7000 | 0.1833 | 0h 5m 50s |
+| 2025-12-13 11:59 | 01DCNN_BiLSTM_1515_ratio3_sample1.0 | Best Metric Model | 0.6000 | 0.7126 | 0.9692 | 0.6889 | 0.0143 | 0h 5m 50s |
+| 2025-12-13 18:52 | 01DCNN_BiLSTM_1515_ratio3_sample2.0 | Best Loss Model | 0.0500 | 0.2281 | 0.6504 | 0.9333 | 0.3662 | 0h 5m 43s |
+| 2025-12-13 18:52 | 01DCNN_BiLSTM_1515_ratio3_sample2.0 | Best Metric Model | 0.3500 | 0.5165 | 0.9010 | 0.9556 | 0.1022 | 0h 5m 43s |
+| 2025-12-13 19:27 | 01DCNN_BiLSTM_1515_ratio3 | Best Loss Model | 0.0500 | 0.3266 | 0.7958 | 0.8944 | 0.2100 | 0h 5m 51s |
+| 2025-12-13 19:27 | 01DCNN_BiLSTM_1515_ratio3 | Best Metric Model | 0.2500 | 0.4785 | 0.8881 | 0.9278 | 0.1143 | 0h 5m 51s |
+| 2025-12-13 19:34 | 01DCNN_BiLSTM_1515_1_3 | Best Loss Model | 0.1500 | 0.2900 | 0.8103 | 0.7000 | 0.1833 | 0h 5m 46s |
+| 2025-12-13 19:34 | 01DCNN_BiLSTM_1515_1_3 | Best Metric Model | 0.6000 | 0.7126 | 0.9692 | 0.6889 | 0.0143 | 0h 5m 46s |

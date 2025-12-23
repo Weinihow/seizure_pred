@@ -17,6 +17,13 @@ sys.path.append(os.path.dirname(__file__))
 from dataset import RealTestDataset
 from metrics import basic_metric
 
+# Manual Threshold Override
+# Format: 'Model_Base_Name': Threshold_Value
+MANUAL_THRESHOLDS = {
+    # Example:
+    # '01DCNN_BiLSTM_1515_ratio10.pth': 0.25,
+}
+
 # GPU Setting
 if torch.backends.mps.is_available():
     device = torch.device("mps")
@@ -239,12 +246,48 @@ def init_model(model_type, input_channels, input_time):
 
 def get_real_test_indices(dataset_name):
     if dataset_name == 'chb01':
-        return [3, 4, 6] # 03/04 has seizure, 06 only interictal
+        return [3, 4, 5, 6] # Targeted files
     elif dataset_name == 'chb03':
         return list(range(1, 11)) + [15] + [24] + list(range(31, 39))
     else:
         # Default fallback or TODO
         return []
+
+def load_threshold_from_log(model_name_base, target_metric_type='Best Metric Model'):
+    """
+    Parse result/training/training_log.md to find the best threshold for the model.
+    Looking for row matching model_name_base and target_metric_type.
+    target_metric_type example: 'Best Metric Model' or 'Best Loss Model'
+    """
+    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'result', 'training', 'training_log.md'))
+    if not os.path.exists(log_path):
+        return None
+    
+    best_threshold = None
+    try:
+        with open(log_path, 'r') as f:
+            lines = f.readlines()
+            # Table Header: | Date | Model Name | Model Type | Threshold | ...
+            for line in lines:
+                if '|' not in line: continue
+                parts = [p.strip() for p in line.split('|')]
+                if len(parts) < 5: continue
+                
+                # parts[0] is empty, parts[1] is Date, parts[2] is Model Name, parts[3] is Model Type
+                row_model_name = parts[2]
+                row_model_type = parts[3]
+                row_threshold = parts[4]
+                
+                if row_model_name == model_name_base and target_metric_type in row_model_type:
+                    try:
+                        best_threshold = float(row_threshold)
+                    except ValueError:
+                        pass
+                    # Keep looking for latest entry
+    except Exception as e:
+        print(f"Error reading log: {e}")
+        
+    return best_threshold
 
 def get_seizure_time_json(dataset_name, ictal_def):
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -262,7 +305,7 @@ def plot_and_save(dataset_name, idx, raw_data, prediction, save_path, seizure_in
     # prediction = prediction[:min_len]
     raw_channel = raw_data[0]
     
-    x1 = np.arange(raw_channel) / sampling_rate
+    x1 = np.arange(len(raw_channel)) / sampling_rate
     x2 = np.arange(len(prediction)) # prediction is now same valid length
     
     fig, ax1 = plt.subplots(figsize=(12, 5))
@@ -318,16 +361,36 @@ if __name__ == "__main__":
     result_dir = os.path.join(base_dir, 'result', 'real_test')
     os.makedirs(result_dir, exist_ok=True)
 
-    # Get all .pth files
-    model_files = [f for f in os.listdir(models_dir) if f.endswith('.pth')]
+    # Define test targets
+    test_targets = []
+    
+    # Standardized: All models in models/ are now deemed 'Best Metric Model' variants
+    # or at least the primary models we want to test.
+    # We treat them all as candidates for 'Best Metric Model' threshold lookup first.
+    
+    model_files = sorted([f for f in os.listdir(models_dir) if f.endswith('.pth')])
+    
     if not model_files:
-        print("No models found in models/")
+        print("No models found in models/.")
         sys.exit()
 
-    print(f"Found {len(model_files)} models.")
+    print(f"Found {len(model_files)} models in models/")
 
-    for model_file in model_files:
-        print(f"\nProcessing model: {model_file}")
+    for f in model_files:
+        test_targets.append({
+            'path': os.path.join(models_dir, f),
+            'filename': f,
+            'base_name': f.replace('.pth', ''),
+            'type': 'Best Metric Model' # Default assumption for primary models now
+        })
+
+    for target in test_targets:
+        model_file = target['filename']
+        model_path = target['path']
+        model_base_name = target['base_name']
+        model_type_label = target['type']
+        
+        print(f"\nProcessing: {model_file} ({model_type_label})")
         
         # Parse model file name
         # Expected format: {Subject}{Model}_{IctalDef}_{Comment}.pth
@@ -343,7 +406,7 @@ if __name__ == "__main__":
             ictal_def_str = match.group(3)
         else:
             # Try simpler pattern: 01DCNN.pth
-            match_simple = re.match(r"(\d+)([a-zA-Z_]+)\.pth", model_file)
+            match_simple = re.match(r"(\d+)([a-zA-Z_]+)\.pth", model_file.replace('_best.pth', '.pth')) # Handle _best suffix for regex
             if match_simple:
                 subject_id = match_simple.group(1)
                 model_type_str = match_simple.group(2)
@@ -352,6 +415,16 @@ if __name__ == "__main__":
             else:
                 print(f"Skipping file {model_file} (naming pattern mismatch)")
                 continue
+        
+        # Check if already tested
+        log_file = os.path.join(base_dir, 'result', 'real_test', 'test_log.md')
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                log_content = f.read()
+            if f"| {model_file} |" in log_content:
+                print(f"Skipping {model_file} (Already in test_log.md)")
+                continue
+
         dataset_name = f"chb{subject_id}"
         
         # Ictal Def Parsing
@@ -375,34 +448,25 @@ if __name__ == "__main__":
             print(f"No real test indices defined for {dataset_name}")
             continue
 
-        # Filter out already processed files
+        # Filter out already processed files based on indices
         base_filename = os.path.basename(model_file).replace('.pth', '')
-        indices_to_process = []
-        for idx in idx_list:
-            save_name = f"{base_filename}_Test_{dataset_name}_{idx:02d}.png"
-            save_path = os.path.join(result_dir, save_name)
-            if os.path.exists(save_path):
-                print(f"Skipping {save_name} (already exists)")
-            else:
-                indices_to_process.append(idx)
         
-        idx_list = indices_to_process
+        # For aggregation, we want to run ALL indices to get a correct full statistic.
+        # But if charts exist, user might want to skip.
+        # However, to regenerate the log line correctly, we really should re-run inference on all.
+        # Or blindly trust existing PNGs? No, logic requested is to check chb01_03,04,05,06.
+        # The user requested to delete old results anyway.
         
-        if not idx_list:
-            print(f"All files for {model_file} already processed.")
-            continue
-
         eeg_dir = os.path.join(base_dir, 'CHB_EEG', dataset_name)
         
-        # Load Model
-        # Need input dims from data first? No, fixed 23, 1280 usually.
-        # But let's load logic first to be safe about dims if possible.
-        # Actually default is usually 23, 1280.
+        # Load data
+        # Check files existence first
+        idx_list = [i for i in idx_list if os.path.exists(os.path.join(eeg_dir, f"{dataset_name}_{i:02d}.edf"))]
         
-        # Load data first to verify input shape
-        # But loading all data for index list might be heavy, do per file?
-        # Original code loads all.
-        
+        if not idx_list:
+             print(f"No EDF files found for {model_file} indices.")
+             continue
+
         raw_signals = load_realtest_segments(idx_list, eeg_dir, dataset_name)
         if not raw_signals:
             continue
@@ -418,21 +482,53 @@ if __name__ == "__main__":
         )
         
         sample_batch = next(iter(data_loader))
-        # shape: (B, C, T)
         input_channels = sample_batch.shape[1]
         input_time = sample_batch.shape[2]
         
-        model = init_model(model_type_str, input_channels, input_time)
-        
         # Load weights
-        checkpoint = torch.load(os.path.join(models_dir, model_file), map_location=device, weights_only=False)
-        if 'model_state_dict' in checkpoint:
-            model.load_state_dict(checkpoint['model_state_dict'])
+        checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        state_dict = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
+        
+        # Determine model architecture from state_dict keys
+        has_lstm = any('lstm' in k for k in state_dict.keys())
+        has_conv = any('conv' in k for k in state_dict.keys())
+        
+        if has_lstm:
+            final_model_type = 'DCNN_BiLSTM'
+        elif has_conv:
+             final_model_type = 'CNN_MLP'
         else:
-            model.load_state_dict(checkpoint) # raw state dict
+             final_model_type = 'MLP'
+             
+        print(f"  > Inferred architecture: {final_model_type} (from keys)")
+        
+        model = init_model(final_model_type, input_channels, input_time)
+        model.load_state_dict(state_dict)
             
-        threshold = checkpoint.get('threshold', 0.5) if isinstance(checkpoint, dict) else 0.5
-        print(f"Loaded threshold: {threshold}")
+        # Priority: Manual > Training Log > Checkpoint > Default
+        threshold = 0.5 # Default
+        
+        # 1. Manual Override
+        # Check both base_name (old behavior) and filename (user preference)
+        if model_base_name in MANUAL_THRESHOLDS:
+            threshold = MANUAL_THRESHOLDS[model_base_name]
+            print(f"Loaded threshold from MANUAL_THRESHOLDS (Base Name): {threshold}")
+        elif model_file in MANUAL_THRESHOLDS:
+            threshold = MANUAL_THRESHOLDS[model_file]
+            print(f"Loaded threshold from MANUAL_THRESHOLDS (File Name): {threshold}")
+        else:
+            # 2. Try loading from log first
+            # We use model_base_name which is cleaned (without _best) and model_type_label (Best Loss vs Best Metric)
+            log_threshold = load_threshold_from_log(model_base_name, model_type_label)
+            
+            if log_threshold is not None:
+                threshold = log_threshold
+                print(f"Loaded threshold from log ({model_type_label}): {threshold}")
+            elif isinstance(checkpoint, dict) and 'threshold' in checkpoint:
+                threshold = checkpoint['threshold']
+                print(f"Loaded threshold from checkpoint: {threshold}")
+            else:
+                 print(f"Using default threshold: {threshold}")
         
         model.eval()
         all_preds = []
@@ -446,13 +542,29 @@ if __name__ == "__main__":
         
         all_preds = np.array(all_preds)
         
-        # Now visualize
-        # Prediction is on 5-sec windows.
-        # Need to map back to original files.
-        # RealTestDataset flattens all files.
-        # We need to know boundaries.
+        # Initialize Aggregation Variables
+        agg_valid_alarms = 0
+        agg_missed_count = 0
+        agg_fa_pre = 0
+        agg_fa_post = 0
+        agg_fa_non_sz = 0
+        agg_total_false_alarms = 0
+        agg_interictal_duration_sec = 0.0
+        
+        # Denominators for Percentage Calculation
+        agg_total_windows_preictal = 0
+        agg_total_windows_inter_pre = 0
+        agg_total_windows_inter_post = 0
+        agg_total_windows_non_sz = 0
+        
+        agg_last_post_times = []
         
         current_pred_idx = 0
+        POINTS_PER_SEC = 256
+        SEC_PER_PRED = 5
+        
+        processed_files = []
+
         for i, idx in enumerate(idx_list):
             raw_data = raw_signals[i]
             n_windows = raw_data.shape[1] // (5 * 256) # 5 sec windows
@@ -469,101 +581,150 @@ if __name__ == "__main__":
             info = seizure_time.get(file_key, {})
             
             plot_and_save(dataset_name, idx, raw_data, file_preds, save_path, info)
-            print(f"Saved plot to {save_path}")
+            # print(f"Saved plot to {save_path}")
             
-            # Helper for metric calculation
-            def count_alarms_in_window(preds, start_idx, end_idx):
-                if start_idx >= end_idx: return 0
-                # Ensure within bounds
-                s = max(0, start_idx)
-                e = min(len(preds), end_idx)
-                if s >= e: return 0
-                return np.sum(preds[s:e])
+            processed_files.append(f"{idx:02d}")
 
-            # Calculate Metrics for Logging
-            # info keys: 'preictal_end_time' -> Seizure Start
-            #            'seizure_end_time' -> Seizure End
+            # Calculate Metrics based on new Zone Definitions:
+            # Zone 1 (Interictal Pre): Start -> Seizure Start - 15m (False Alarm Zone)
+            # Zone 2 (Preictal): Seizure Start - 15m -> Seizure Start (True Alarm Zone)
+            # Zone 3 (Ictal + Postictal): Seizure Start -> Seizure End + 15m (Don't Care Zone)
+            # Zone 4 (Interictal Post): Seizure End + 15m -> End (False Alarm Zone)
             
             seizure_start = info.get('preictal_end_time')
             seizure_end = info.get('seizure_end_time')
             
-            # Defaults
             valid_alarms = 0
-            early_alarms = 0
-            missed = "N/A"
-            post_alarms = 0
-            last_post_time_str = "-"
-            fpr_h = 0.0
-            
-            POINTS_PER_SEC = 256 # Data
-            SEC_PER_PRED = 5 # Prediction resolution
+            missed = False
+            fa_pre = 0
+            fa_post = 0
+            fa_non_sz = 0
+            file_interictal_duration = 0.0
             
             if len(file_preds) > 0:
                 total_duration_sec = len(file_preds) * SEC_PER_PRED
                 
                 if seizure_start is not None and seizure_end is not None:
                     # Seizure File
-                    # Indices
+                    preictal_duration = 15 * 60
+                    postictal_duration = 15 * 60
+                    
                     sz_start_idx = int(seizure_start / SEC_PER_PRED)
                     sz_end_idx = int(seizure_end / SEC_PER_PRED)
                     
-                    # Valid: 15 min before seizure
-                    valid_start_idx = int((seizure_start - 15*60) / SEC_PER_PRED)
+                    # Zone 2: Preictal (True Alarm)
+                    # valid_start_time = seizure_start - preictal_duration
+                    valid_start_idx = int((seizure_start - preictal_duration) / SEC_PER_PRED)
                     valid_alarms = np.sum(file_preds[max(0, valid_start_idx):sz_start_idx])
                     
-                    # Early: 60 min to 15 min before
-                    early_start_idx = int((seizure_start - 60*60) / SEC_PER_PRED)
-                    early_alarms = np.sum(file_preds[max(0, early_start_idx):valid_start_idx])
+                    if valid_alarms == 0:
+                        missed = True
                     
-                    # Missed?
-                    missed = "Yes" if (valid_alarms + early_alarms) == 0 else "No"
+                    # Zone 1: Interictal Pre (False Alarm)
+                    fa_pre = np.sum(file_preds[0:max(0, valid_start_idx)])
                     
-                    # Post Seizure
-                    post_alarms_arr = file_preds[sz_end_idx:]
-                    post_alarms = np.sum(post_alarms_arr)
+                    # Zone 4: Interictal Post (False Alarm)
+                    post_interictal_start_time = seizure_end + postictal_duration
+                    post_interictal_start_idx = int(post_interictal_start_time / SEC_PER_PRED)
                     
-                    if post_alarms > 0:
-                        # Find last alarm index relative to post_alarms_arr
-                        last_idx = np.where(post_alarms_arr == 1)[0][-1]
+                    if post_interictal_start_idx < len(file_preds):
+                        fa_post = np.sum(file_preds[post_interictal_start_idx:])
+                        
+                    # Accumulate Interictal Duration for FPR
+                    # Duration before Preictal
+                    z1_duration = max(0, seizure_start - preictal_duration)
+                    # Duration after Postictal
+                    z4_duration = max(0, total_duration_sec - post_interictal_start_time)
+                    file_interictal_duration = z1_duration + z4_duration
+                    
+                    # Last Post-Seizure Time
+                    post_seizure_preds = file_preds[sz_end_idx:]
+                    if np.sum(post_seizure_preds) > 0:
+                        last_idx = np.where(post_seizure_preds == 1)[0][-1]
                         last_time_sec = (last_idx + 1) * SEC_PER_PRED
                         m, s = divmod(last_time_sec, 60)
-                        last_post_time_str = f"+{int(m)}m {int(s)}s"
-                        
-                    # FPR (Interictal): Exclude [Preictal (1h?) + Seizure + Postictal?]
-                    # Simply: Total alarms - (Valid + Early + Post) ? 
-                    # Or defined as Alarms in "Normal" period.
-                    # Typically Interictal is > 4h from seizure. But for this short file:
-                    # Let's count "Other Alarms" = Total - (Valid + Early + Post + Ictal)
-                    
-                    # Ictal Alarms
-                    ictal_alarms = np.sum(file_preds[sz_start_idx:sz_end_idx])
-                    
-                    false_alarms = np.sum(file_preds) - (valid_alarms + early_alarms + ictal_alarms + post_alarms)
-                    # Duration for FPR: Total - (1h preictal + Seizure duration)
-                    # Approx duration
-                    fpr_duration_h = (total_duration_sec - (60*60) - (seizure_end - seizure_start)) / 3600
-                    if fpr_duration_h > 0:
-                        fpr_h = false_alarms / fpr_duration_h
-                    
+                        agg_last_post_times.append(f"{idx:02d}:+{int(m)}m {int(s)}s")
+
                 else:
                     # Interictal File
-                    missed = "-"
-                    # All alarms are False Alarms
-                    false_alarms = np.sum(file_preds)
-                    fpr_h = false_alarms / (total_duration_sec / 3600)
+                    missed = False # Not applicable really, but counts as 0 missed
+                    fa_pre = 0
+                    fa_post = 0
+                    fa_non_sz = np.sum(file_preds)
+                    file_interictal_duration = total_duration_sec
+            
+            # Aggregate
+            agg_valid_alarms += valid_alarms
+            if missed:
+                agg_missed_count += 1
+            agg_fa_pre += fa_pre
+            agg_fa_post += fa_post
+            agg_fa_non_sz += fa_non_sz
+            agg_total_false_alarms += (fa_pre + fa_post + fa_non_sz)
+            agg_interictal_duration_sec += file_interictal_duration
+
+            # Aggregate Denominators (Total Windows) based on file type
+            if seizure_start is not None and seizure_end is not None:
+                # Preictal (Zone 2)
+                # valid_start_idx to sz_start_idx
+                agg_total_windows_preictal += (sz_start_idx - max(0, valid_start_idx))
                 
-                # Log to file
-                log_file = os.path.join(base_dir, 'result', 'real_test', 'test_log.md')
-                header = "| Model Name | File | Valid Warnings (<15m) | Early Warnings (15-60m) | Missed | Post-Seizure Alarms | Last Post-Alarm Time | False Alarms | FPR/h |\n|---|---|---|---|---|---|---|---|---|\n"
+                # Interictal Pre (Zone 1)
+                # 0 to valid_start_idx
+                agg_total_windows_inter_pre += max(0, valid_start_idx)
                 
-                if not os.path.exists(log_file):
-                    with open(log_file, 'w') as f:
-                        f.write(header)
-                
-                row = f"| {model_file} | {dataset_name}_{idx:02d} | {valid_alarms} | {early_alarms} | {missed} | {post_alarms} | {last_post_time_str} | {int(false_alarms)} | {fpr_h:.2f} |\n"
-                with open(log_file, 'a') as f:
-                    f.write(row)
-                print(f"Logged metrics to {log_file}")
+                # Interictal Post (Zone 4)
+                # post_interictal_start_idx to end
+                if post_interictal_start_idx < len(file_preds):
+                    agg_total_windows_inter_post += (len(file_preds) - post_interictal_start_idx)
+            else:
+                # Non-Sz File
+                agg_total_windows_non_sz += len(file_preds)
+
+        # Final Calculations per Model
+        if agg_interictal_duration_sec > 0:
+            agg_fpr_h = agg_total_false_alarms / (agg_interictal_duration_sec / 3600)
+        else:
+            agg_fpr_h = 0.0
+            
+        last_post_str = ", ".join(agg_last_post_times) if agg_last_post_times else "-"
+        files_str = f"{dataset_name}[{','.join(processed_files)}]"
+
+        # Helper format string
+        def fmt_stat(count, total):
+            if total == 0:
+                return "0.0%"
+            pct = (count / total) * 100
+            return f"{pct:.1f}%"
+
+        str_valid = fmt_stat(agg_valid_alarms, agg_total_windows_preictal)
+        str_fa_pre = fmt_stat(agg_fa_pre, agg_total_windows_inter_pre)
+        str_fa_post = fmt_stat(agg_fa_post, agg_total_windows_inter_post)
+        str_fa_non_sz = fmt_stat(agg_fa_non_sz, agg_total_windows_non_sz)
+
+        # Log to file (Summary Row)
+        log_file = os.path.join(base_dir, 'result', 'real_test', 'test_log.md')
+        
+        # Determine Header based on calculated totals (Use current run's totals as reference)
+        header_valid = f"Valid Warnings (/{agg_total_windows_preictal})"
+        header_fa_pre = f"FA Pre (/{agg_total_windows_inter_pre})"
+        header_fa_post = f"FA Post (/{agg_total_windows_inter_post})"
+        header_fa_nonsz = f"FA Non-Sz (/{agg_total_windows_non_sz})"
+        
+        header = f"| Model Name | Files | {header_valid} | Missed Count | {header_fa_pre} | {header_fa_post} | {header_fa_nonsz} | Total FA | FPR/h | Last Post-Alarm Times |\n|---|---|---|---|---|---|---|---|---|---|\n"
+        
+        if not os.path.exists(log_file):
+            with open(log_file, 'w') as f:
+                f.write(header)
+        else:
+             # If file exists, check if we need to update header (Optional, skipping for simplicity or can implement read-replace)
+             # For now, just append. User can delete file to refresh header.
+             pass
+        
+        row = f"| {model_file} | {files_str} | {str_valid} | {agg_missed_count} | {str_fa_pre} | {str_fa_post} | {str_fa_non_sz} | {int(agg_total_false_alarms)} | {agg_fpr_h:.2f} | {last_post_str} |\n"
+        with open(log_file, 'a') as f:
+            f.write(row)
+        print(f"Logged summary to {log_file}")
 
     print("\nAll models processed.")
 
