@@ -12,5 +12,8 @@ logs/*.log
 result/real_test/*.png
 result/training/*.png
 
+# 系統檔案
+.DS_Store
+
 # CHB_EEG/chb01/*.edf
 # CHB_EEG/chb03/*.edf
